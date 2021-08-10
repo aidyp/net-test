@@ -10,23 +10,23 @@ def launch_nasty_attack(domain):
     
     custom_headers = {'X-Sneaky-Hack': 'pwned'}
     try:
-        r = requests.get(domain, headers=custom_headers)
+        r = requests.get(domain, headers=custom_headers, timeout = 5)
         print("The hacker can connect!")
-        return r.status_code
+        return False
     except requests.exceptions.RequestException as e:
         print("Hacker can't connect -- nice!")
-        return 0
+        return True
 
 def regular_customer(domain):
     '''
     Regular customers connect normally. We don't want to stop them connecting 
     '''
     try:
-        r = requests.get(domain)
-        return r.status_code
+        r = requests.get(domain, timeout = 5)
+        return True
     except requests.exceptions.RequestException as e: 
         print("Customers can't connect to your webserver: ", str(e))
-        return 0 
+        return False
     
 
 def evaluate_scenario(domain):
@@ -34,12 +34,7 @@ def evaluate_scenario(domain):
     Check whether the firewall rule is dropping the right packets 
     '''
     
-    passed = True 
-    
-    if regular_customer(domain) != 200 or launch_nasty_attack(domain) == 200:
-        passed = False 
-        
-        
+    passed = regular_customer(domain) and launch_nasty_attack(domain)
     print("Passed: ", passed)
         
     
